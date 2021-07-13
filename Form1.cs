@@ -17,7 +17,7 @@ namespace shinycolors_client
         private bool autoMeter = false, initialLoad = false, searching = false;
 
         public string applicationPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\shinycolors";
-        public int delay1 = 5, delay2 = 10;
+        public int delay = 3;
 
         private const int MOUSEEVENTF_LEFTDOWN = 0x2;
         private const int MOUSEEVENTF_LEFTUP = 0x4;
@@ -38,10 +38,7 @@ namespace shinycolors_client
             this.Size = this.windowSize;
             webView1.Location = new System.Drawing.Point(0, 0);
             webView1.Size = this.ClientSize;
-
-
             button1.Text = "自動ゲージ OFF";
-
             label1.Text = "";
         }
 
@@ -74,10 +71,7 @@ namespace shinycolors_client
         private void webView1_WebMessageReceived(object sender, CoreWebView2WebMessageReceivedEventArgs e)
         {
             if (autoMeter&&!searching)
-            {
                 this._Click();
-            }
-            
         }
 
         private void button1_Click(object sender, EventArgs e)
@@ -114,31 +108,23 @@ namespace shinycolors_client
             else if (point.Y > 350 && point.Y < 492)
             {
                 if (point.X > 215 && point.X < 360)
-                {
                     appeal = appeal == 1 ? 0: 1;
-                }
                 else if (point.X > 361 && point.X < 505)
-                {
                     appeal = appeal == 2 ? 0 : 2;
-                }
                 else if (point.X > 506 && point.X < 651)
-                {
                     appeal = appeal == 3 ? 0 : 3;
-                }
 
                 if (appeal == 0)
-                {
                     label1.Text = "アピール未選択   X:" + point.X + " Y:" + point.Y;
-                }
                 else
-                {
                     label1.Text = "アピール　" + appeal + " 選択中";
-                }
             }
         }
 
         private async void LoopW()
         {
+            label1.Text = "パーフェクト待機中";
+
             await Task.Delay(315);
             searching = true;
             int i = FindPerfectPoint();
@@ -152,13 +138,9 @@ namespace shinycolors_client
                 return;
             }
 
-            else if (i == 193 || i == 194 || i == 171 || i == 172) i -= delay1;
-            else if (i == 167 || i == 168 || i == 147 || i == 148) i -= delay2;
-
             while (appeal != 0)
             {
-                await Task.Delay(1);
-                Loop(i);
+                Loop(i-delay);
             }
         }
 
@@ -191,13 +173,6 @@ namespace shinycolors_client
                 _MouseClick();
                 appeal = 0;
                 searching = false;
-            }
-            else if(appeal != 0)
-            {
-                if (!label1.Text.Equals("パーフェクト待機中"))
-                {
-                    label1.Text = "パーフェクト待機中";
-                }
             }
         }
 
