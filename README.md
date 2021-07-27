@@ -6,8 +6,8 @@
 
 ## 環境
 
-WebView2ランタイム または Microsoft Edge (Chromium) カナリアチャネル が必要です
-
+*WebView2ランタイム または Microsoft Edge (Chromium) カナリアチャネル が必要です
+*ある程度性能の良いCPUでないとまともに動作しません
 
 
 ## 注意事項
