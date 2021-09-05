@@ -4,6 +4,7 @@ using System.Windows.Forms;
 using System.Runtime.InteropServices;
 using System.Threading.Tasks;
 using Microsoft.Web.WebView2.Core;
+using System.Drawing.Imaging;
 
 namespace shinycolors_client
 {
@@ -17,7 +18,7 @@ namespace shinycolors_client
         private bool autoMeter = false, initialLoad = false, searching = false;
 
         public string applicationPath = Environment.GetFolderPath(Environment.SpecialFolder.ApplicationData) + @"\shinycolors";
-        public int delay = 3;
+        public int delay = 4;
 
         private const int MOUSEEVENTF_LEFTDOWN = 0x2;
         private const int MOUSEEVENTF_LEFTUP = 0x4;
@@ -147,7 +148,7 @@ namespace shinycolors_client
         private int FindPerfectPoint()
         {
             var meterPoint = PointToScreen(new Point(370, 310));
-            Graphics.FromImage(bitmap).CopyFromScreen(meterPoint, new Point(0,0), meterSize);
+            Graphics.FromImage(bitmap).CopyFromScreen(meterPoint, new Point(0, 0), meterSize);
             for (int i = 0; i < meterSize.Width; i++)
             {
                 var color = bitmap.GetPixel(i, 3);
@@ -162,11 +163,14 @@ namespace shinycolors_client
 
         private void Loop(int perfectPoint)
         {
-            var meterPoint = PointToScreen(new Point(370, 310));
-            Graphics.FromImage(bitmap).CopyFromScreen(meterPoint, new Point(0, 0), meterSize);
-            var color = bitmap.GetPixel(perfectPoint, 20);
+            byte[] bytes = GetColor(perfectPoint, 20);
 
-            if (color.R > 200 && color.G > 200 && color.B > 105)
+            int r = bytes[2];
+            int g = bytes[1];
+            int b = bytes[0];
+
+            Console.WriteLine("r:{0},g:{1},b:{2},perfect:{3}",r,g,b,perfectPoint);
+            if (r > 200 && g > 200 && b > 105)
             {
                 label1.Text = "座標 " + perfectPoint + "でクリック";
 
@@ -174,6 +178,20 @@ namespace shinycolors_client
                 appeal = 0;
                 searching = false;
             }
+        }
+
+        private byte[] GetColor(int perfectPoint,int y)
+        {
+            var meterPoint = PointToScreen(new Point(370, 310));
+            Graphics.FromImage(bitmap).CopyFromScreen(meterPoint, new Point(0, 0), meterSize);
+
+            BitmapData bitmapData = bitmap.LockBits(new Rectangle(perfectPoint, y, 1, 1), System.Drawing.Imaging.ImageLockMode.ReadOnly, System.Drawing.Imaging.PixelFormat.Format24bppRgb);
+            byte[] bytes = new byte[3];
+            Marshal.Copy(bitmapData.Scan0, bytes, 0, bytes.Length);
+
+            bitmap.UnlockBits(bitmapData);
+
+            return bytes;
         }
 
         private void _MouseClick()
